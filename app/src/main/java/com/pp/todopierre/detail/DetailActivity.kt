@@ -29,7 +29,8 @@ class DetailActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val inittask = intent.getSerializableExtra("task") as Task? ?: Task(id = UUID.randomUUID().toString(), title = "", description = "")
+        val inittask = intent.getSerializableExtra("task") as Task?
+            ?: Task(id = UUID.randomUUID().toString(), title = "", description = "")
 
         setContent {
             TodoPierreTheme {
@@ -80,7 +81,7 @@ fun Detail(modifier: Modifier = Modifier, onValidate: (Task) -> Unit, initTask :
         )
 
         Button(
-            onClick = {onValidate(Task(task.id,task.title, task.description))},
+            onClick = {onValidate(task)},
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp)

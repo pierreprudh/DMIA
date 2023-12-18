@@ -20,11 +20,8 @@ object TaskDiffCallback : DiffUtil.ItemCallback<Task>() {
         return oldItem == newItem// comparaison: est-ce le même "contenu" ? => mêmes valeurs? (avec data class: simple égalité)
     }
 }
-class TaskListAdapter : ListAdapter<Task, TaskListAdapter.TaskViewHolder>(TaskDiffCallback) {
+class TaskListAdapter(val listener: TaskListListener): ListAdapter<Task, TaskListAdapter.TaskViewHolder>(TaskDiffCallback) {
 
-    var onClickDelete: (Task) -> Unit = {}
-
-    var onClickEdit: (Task) -> Unit = {}
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
         return TaskViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_task, parent, false))
@@ -44,11 +41,11 @@ class TaskListAdapter : ListAdapter<Task, TaskListAdapter.TaskViewHolder>(TaskDi
             taskDescriptionTextView.text = task.description
 
             itemView.findViewById<ImageButton>(R.id.buttondelete).setOnClickListener {
-                onClickDelete(task)
+                listener.onClickDelete(task)
             }
 
             itemView.findViewById<ImageButton>(R.id.buttonedit).setOnClickListener {
-                onClickEdit(task)
+                listener.onClickEdit(task)
             }
         }
 
