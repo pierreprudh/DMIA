@@ -5,12 +5,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.pp.todopierre.R
 import com.pp.todopierre.data.Api
@@ -95,6 +97,7 @@ class TaskListFragment : Fragment() {
         lifecycleScope.launch {
             val user = Api.userWebService.fetchUser().body()!!
             view?.findViewById<TextView>(R.id.TVTitre)?.setText(user.name)
+            view?.findViewById<ImageView>(R.id.PP)?.load("https://goo.gl/gEgYUd")
             viewModel.refresh() // on demande de rafraîchir les données sans attendre le retour directement
         }
     }

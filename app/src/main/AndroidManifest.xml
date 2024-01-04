@@ -15,6 +15,11 @@
         android:theme="@style/Theme.TodoPierre"
         tools:targetApi="31">
         <activity
+            android:name=".user.UserActivity"
+            android:exported="false"
+            android:label="@string/title_activity_user"
+            android:theme="@style/Theme.TodoPierre" />
+        <activity
             android:name=".detail.DetailActivity"
             android:exported="false"
             android:label="@string/title_activity_detail"
