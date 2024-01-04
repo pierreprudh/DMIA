@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -25,8 +26,7 @@ class TaskListFragment : Fragment() {
 
     val adapterListener : TaskListListener = object : TaskListListener {
         override fun onClickDelete(task: Task) {
-            taskList = taskList - task
-            adapter.submitList(taskList)
+            viewModel.remove(task)
         }
         override fun onClickEdit(task: Task) {
             val intent = Intent(context, DetailActivity::class.java)
@@ -37,21 +37,19 @@ class TaskListFragment : Fragment() {
 
     private val adapter = TaskListAdapter(adapterListener)
 
-    private var taskList = emptyList<Task>()
+    private val viewModel: TasksListViewModel by viewModels()
 
     val createTask = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val task = result.data?.getSerializableExtra("task") as Task?
         if (task != null) {
-            taskList = taskList + task
-            adapter.submitList(taskList)
+            viewModel.add(task)
         }
     }
 
     val editTask = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val task = result.data?.getSerializableExtra("task") as Task?
         if (task != null) {
-            taskList = taskList.map { if (it.id == task.id) task else it }
-            adapter.submitList(taskList)
+            viewModel.update(task)
         }
     }
 
@@ -60,6 +58,7 @@ class TaskListFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        lifecycleScope.launch { viewModel.refresh() }
 
         return inflater.inflate(R.layout.fragment_task_list, container, false)
     }
@@ -67,7 +66,6 @@ class TaskListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter.submitList(taskList)
 
         val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
         recyclerView.adapter = adapter
@@ -82,6 +80,14 @@ class TaskListFragment : Fragment() {
             createTask.launch(intent)
         }
 
+        lifecycleScope.launch { // on lance une coroutine car `collect` est `suspend`
+            viewModel.tasksStateFlow.collect { newList ->
+                // cette lambda est exécutée à chaque fois que la liste est mise à jour dans le VM
+                // -> ici, on met à jour la liste dans l'adapter
+                adapter.submitList(newList)
+            }
+        }
+
     }
 
     override fun onResume() {
@@ -89,6 +95,7 @@ class TaskListFragment : Fragment() {
         lifecycleScope.launch {
             val user = Api.userWebService.fetchUser().body()!!
             view?.findViewById<TextView>(R.id.TVTitre)?.setText(user.name)
+            viewModel.refresh() // on demande de rafraîchir les données sans attendre le retour directement
         }
     }
 }

@@ -15,6 +15,10 @@ object Api {
         retrofit.create(UserWebService::class.java)
     }
 
+    val tasksWebService : TasksWebService by lazy {
+        retrofit.create(TasksWebService::class.java)
+    }
+
 
     private val retrofit by lazy {
         // client HTTP
