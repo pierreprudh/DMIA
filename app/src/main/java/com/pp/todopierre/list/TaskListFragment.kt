@@ -17,6 +17,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.pp.todopierre.R
 import com.pp.todopierre.data.Api
 import com.pp.todopierre.detail.DetailActivity
+import com.pp.todopierre.user.UserActivity
 import kotlinx.coroutines.launch
 
 interface TaskListListener {
@@ -82,6 +83,11 @@ class TaskListFragment : Fragment() {
             createTask.launch(intent)
         }
 
+        view.findViewById<ImageView>(R.id.PP).setOnClickListener{
+
+            startActivity(Intent(context, UserActivity::class.java))
+        }
+
         lifecycleScope.launch { // on lance une coroutine car `collect` est `suspend`
             viewModel.tasksStateFlow.collect { newList ->
                 // cette lambda est exécutée à chaque fois que la liste est mise à jour dans le VM
@@ -97,7 +103,9 @@ class TaskListFragment : Fragment() {
         lifecycleScope.launch {
             val user = Api.userWebService.fetchUser().body()!!
             view?.findViewById<TextView>(R.id.TVTitre)?.setText(user.name)
-            view?.findViewById<ImageView>(R.id.PP)?.load("https://goo.gl/gEgYUd")
+            view?.findViewById<ImageView>(R.id.PP)?.load(user.avatar) {
+                error(R.drawable.ic_launcher_background)
+            }
             viewModel.refresh() // on demande de rafraîchir les données sans attendre le retour directement
         }
     }
